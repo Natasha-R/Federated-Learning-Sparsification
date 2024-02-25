@@ -8,6 +8,18 @@ Three approaches to sparsification are compared:
 * Top-k - Selecting the top k% parameters with the largest absolute differences before and after model training  
 * Threshold - selecting parameters with absolute differences that are larger than a given threshold
 
+Two datasets ([data.py](data.py)) are used for the experiments:
+
+* CIFAR-10 - Imbalanced, non-iid partition of data between the clients
+* FEMNIST - Data distributed between the clients based on the author
+
+The basic convolutional model ``CNN500k`` ([models.py](models.py)):
+
+* Model for CIFAR-10 - 471,338 parameters (1.89 MB)
+* Model for FEMNIST - 369,432 parameters (1.48 MB)
+
+All experiments were implemented in PyTorch using Flower's virtual client engine ([https://github.com/adap/flower](https://github.com/adap/flower)).
+
 ## Experiments
 
 **72 experiments were run for all combinations of:**
@@ -34,14 +46,11 @@ Results from the experiments: [data](results) and [figures](figures).
 * Number of federated learning rounds:
 	* FEMNIST = ``30``
 	* CIFAR = ``180``
-* Metric = Accuracy as measured on the test dataset
-* Model = ``CNN500k`` as provided in [models.py](models.py)
-* Data distribution = as provided in [data.py](data.py)
+* Metric = ``Accuracy`` as measured on the test dataset
 
 **Baseline:**
 
-FedAvg [(https://arxiv.org/abs/1602.05629)](https://arxiv.org/abs/1602.05629) using the same set-up as above.
-
+Federated Averaging [(https://arxiv.org/abs/1602.05629)](https://arxiv.org/abs/1602.05629) using the same set-up as above.
 
 ## Simulation
 
