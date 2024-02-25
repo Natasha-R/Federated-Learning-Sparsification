@@ -4,38 +4,44 @@ The communication efficiency of federated learning is improved by sparsifying th
 
 Three approaches to sparsification are compared:  
 
-* **Random** - Randomly selecting k% parameters  
-* **Top-k** - Selecting the top k% parameters with the largest absolute differences before and after model training  
-* **Threshold** - selecting parameters with absolute differences that are larger than a given threshold
+* Random - Randomly selecting k% parameters  
+* Top-k - Selecting the top k% parameters with the largest absolute differences before and after model training  
+* Threshold - selecting parameters with absolute differences that are larger than a given threshold
 
 ## Experiments
 
-####  72 experiments were run for all combinations of: 
+**72 experiments were run for all combinations of:**
 
 * Dataset = ``[femnist, cifar]``
 * Approach = ``[random, topk, threshold]``
 * Sparsify by:
-	* Random & top-k = ``[0.5, 0.3, 0.1, 0.05, 0.03, 0.01]``
+	* Random & Top-k = ``[0.5, 0.3, 0.1, 0.05, 0.03, 0.01]``
 	* Threshold = ``[0.001, 0.003, 0.005, 0.007, 0.0085, 0.01]``
 * Keep first and last layer = ``[TRUE, FALSE]``
 
-#### Experimental set-up:
+Results from the experiments: [data](results) and [figures](figures).
+
+**Experimental set-up:**
 
 * Number of clients = ``50``
 * Number of epochs = ``1``
 * Learning rate = ``0.1``
 * Optimiser = ``SGD``
+* Regularisation = ``0``
 * Fraction of clients sampled each round:
 	* FEMNIST = ``0.25``
 	* CIFAR = ``0.3``
-* Number of rounds:
+* Number of federated learning rounds:
 	* FEMNIST = ``30``
 	* CIFAR = ``180``
 * Metric = Accuracy as measured on the test dataset
-* Model = ``CNN500k`` as provided in models.py
-* Data distribution = as provided in data.py
+* Model = ``CNN500k`` as provided in [models.py](models.py)
+* Data distribution = as provided in [data.py](data.py)
 
-#### Baseline:
+**Baseline:**
+
+FedAvg [(https://arxiv.org/abs/1602.05629)](https://arxiv.org/abs/1602.05629) using the same set-up as above.
+
 
 ## Simulation
 
