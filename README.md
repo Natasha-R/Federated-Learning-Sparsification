@@ -6,7 +6,7 @@ Three approaches to sparsification are compared:
 
 * Random - Randomly selecting k% parameters  
 * Top-k - Selecting the top k% parameters with the largest absolute differences before and after model training  
-* Threshold - selecting parameters with absolute differences that are larger than a given threshold
+* Threshold - Selecting parameters with absolute differences that are larger than a given threshold
 
 Two datasets ([data.py](data.py)) are used for the experiments:
 
@@ -59,13 +59,13 @@ Example command:
 
 | Parameter          | Description                                                                                                                                |
 |--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| --dataset_name     | Can be ``femnist`` or ``cifar``                                                                                                            |
+| --dataset_name     | Can be ``femnist`` or ``cifar``.                                                                                                            |
 | --femnist_location | Path to the location of the femnist data. Must be pre-downloaded.                                                                          |
-| --approach         | Can be ``random`` ``topk``or ``threshold``                                                                                                 |
+| --approach         | Can be ``random`` ``topk``or ``threshold``.                                                                                                 |
 | --sparsify_by      | Float between 0 and 1 indicating the fraction of parameters to select. For the threshold approach this corresponds to the threshold value. |
 | --num_rounds       | Number of federated learning rounds.                                                                                                       |
-| --keep_first_last  | Boolean TRUE or FALSE. Indicates whether to ensure that the very first and last layers in the neural network are selected.                 |
+| --keep_first_last  | Boolean ``TRUE`` or ``FALSE``. Indicates whether to force the selection of all parameters in the very first and last layers in the network.                 |
 | --epochs           | Number of epochs each client trains the local model for.                                                                                   |
-| --learning_rate    | Learning rate for the local model training.                                                                                                |
+| --learning_rate    | Learning rate for the model training.                                                                                                |
 | --regularisation   | Regularisation/weight decay parameter for the optimiser.                                                                                   |
 
