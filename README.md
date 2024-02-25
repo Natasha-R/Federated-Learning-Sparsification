@@ -40,7 +40,7 @@ Three approaches to sparsification are compared:
 ## Simulation
 
 Example command:  
-``python simulation.py --dataset_name="cifar" approach="topk" sparsify_by=0.1 num_rounds=180``
+``python simulation.py --dataset_name="cifar" --approach="topk" --sparsify_by=0.1 --num_rounds=180``
 
 | Parameter          | Description                                                                                                                                |
 |--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
