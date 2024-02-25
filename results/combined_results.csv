@@ -1,0 +1,22 @@
+﻿Method,Type,Dataset,"Client
+Bytes Uploaded",Number of Rounds,Total Bytes Uploaded,Accuracy
+FedAvg,Baseline,CIFAR-10,1885352,139,262063928,58.5
+Distillation (10 rounds),Distillation,CIFAR-10,800000,10,8000000,61.9
+Distillation (2 rounds),Distillation,CIFAR-10,800000,2,1600000,42
+MA-Echo (2 rounds),One-shot,CIFAR-10,7233548,2,14467096,27.38
+MA-Echo (1 round),One-shot,CIFAR-10,7233548,1,7233548,16.2
+FedKT (1 student),One-shot,CIFAR-10,1885352,1,1885352,33.94
+Top-k (10%),Sparsification,CIFAR-10,377064,132,49772448,60.1
+Top-k (1%),Sparsification,CIFAR-10,37704,125,4713000,50
+Threshold (~3.6%),Sparsification,CIFAR-10,139271,113,15737623,56
+Threshold (~0.2%),Sparsification,CIFAR-10,15850,148,2345800,41.5
+FedAvg,Baseline,FEMNIST,1477752,22,32510544,80.4
+Distillation (4 rounds),Distillation,FEMNIST,5191384,4,20765536,80.1
+Distillation (2 rounds),Distillation,FEMNIST,5191384,2,10382768,73.9
+MA-Echo (2 rounds),One-shot,FEMNIST,6106556,2,12213112,73.78
+MA-Echo (1 round),One-shot,FEMNIST,6106556,1,6106556,43.7
+FedKT (1 student),One-shot,FEMNIST,1477752,1,1477752,14.23
+Top-k (10%),Sparsification,FEMNIST,295544,26,7684144,80.4
+Top-k (1%),Sparsification,FEMNIST,29552,28,827456,73.5
+Threshold (~5.6%),Sparsification,FEMNIST,164856,29,4780824,79.7
+Threshold (~0.4%),Sparsification,FEMNIST,10710,30,321300,63
