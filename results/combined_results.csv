@@ -1,6 +1,6 @@
 ﻿Method,Type,Dataset,"Client
 Bytes Uploaded",Number of Rounds,Total Bytes Uploaded,Accuracy
-FedAvg,Baseline,CIFAR-10,1885352,139,262063928,58.5
+FedAvg,Baseline,CIFAR-10,1885352,153,288458856,55.4
 Distillation (10 rounds),Distillation,CIFAR-10,800000,10,8000000,61.9
 Distillation (2 rounds),Distillation,CIFAR-10,800000,2,1600000,42
 MA-Echo (2 rounds),One-shot,CIFAR-10,7233548,2,14467096,27.38
@@ -10,7 +10,7 @@ Top-k (10%),Sparsification,CIFAR-10,377064,132,49772448,60.1
 Top-k (1%),Sparsification,CIFAR-10,37704,125,4713000,50
 Threshold (~3.6%),Sparsification,CIFAR-10,139271,113,15737623,56
 Threshold (~0.2%),Sparsification,CIFAR-10,15850,148,2345800,41.5
-FedAvg,Baseline,FEMNIST,1477752,22,32510544,80.4
+FedAvg,Baseline,FEMNIST,1477752,24,35466048,80.3
 Distillation (4 rounds),Distillation,FEMNIST,5191384,4,20765536,80.1
 Distillation (2 rounds),Distillation,FEMNIST,5191384,2,10382768,73.9
 MA-Echo (2 rounds),One-shot,FEMNIST,6106556,2,12213112,73.78

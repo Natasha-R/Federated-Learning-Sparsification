@@ -51,8 +51,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Simulate FedAvg")
     parser.add_argument("--dataset_name", required=True)
     parser.add_argument("--femnist_location", default="femnist_data")
-    parser.add_argument("--optimiser", default="Adam")
-    parser.add_argument("--learning_rate", default=0.001, type=float)
+    parser.add_argument("--optimiser", default="SGD")
+    parser.add_argument("--learning_rate", default=0.1, type=float)
     args = parser.parse_args()
     
     if args.dataset_name=="femnist":
@@ -90,8 +90,7 @@ if __name__ == "__main__":
     end = datetime.now()
     time_taken = end-start
     
-    results = pd.DataFrame({"date": [datetime.now()], 
-                            "time_taken": [time_taken],
+    results = pd.DataFrame({"time_taken": [time_taken],
                             "dataset": [args.dataset_name], 
                             "num_rounds": [num_rounds],
                             "approach": ["FedAvg"],
