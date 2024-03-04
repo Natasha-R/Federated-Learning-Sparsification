@@ -9,37 +9,86 @@ import matplotlib.text as mtext
 import matplotlib.ticker as mtick
 import ast
 import oapackage
+import random
 
-def plot_class_distributions(loaders, dataset_name):
+def plot_cifar_distribution():
     
+    loaders, testloaders = data.cifar_data()
+    loaders = loaders[0:10]
+    testloaders = testloaders[0:10]
+
+    sns.set_theme(style="white", font_scale=1.25)
+    fig, axes = plt.subplots(ncols=2, nrows=1, figsize=(12, 6), sharey=True, gridspec_kw={"wspace": 0.03})
+    cifar_classes = ["plane", "car", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
+
+    classes_counts = pd.DataFrame([pd.Series(np.concatenate([batch[1].numpy() for batch in loader])).value_counts() for loader in loaders]).fillna(0).reset_index(drop=True)
+    classes_counts = classes_counts.reindex(sorted(classes_counts.columns), axis=1)
+    classes_counts["client"] = [f"Client {value}" for value in reversed(range(1, 11))]
+    classes_counts.columns = cifar_classes + ["client"]
+    classes_counts.plot(x="client", y=cifar_classes, kind="barh", stacked=True, width=0.8, ax=axes[0], colormap="tab10")
+
+    classes_test = pd.DataFrame([pd.Series(np.concatenate([batch[1].numpy() for batch in test])).value_counts() for test in testloaders]).fillna(0).reset_index(drop=True)
+    classes_test = classes_test.reindex(sorted(classes_test.columns), axis=1)
+    classes_test["client"] = [f"Client {value}" for value in reversed(range(1, 11))]
+    classes_test.columns = cifar_classes + ["client"]
+    classes_test.plot(x="client", y=cifar_classes, kind="barh", stacked=True, width=0.8, ax=axes[1], colormap="tab10")
+
+    axes[0].legend(title="Class", loc=(2.05, 0.04), handlelength=1.5, handleheight=2, handletextpad=0.3)
+    axes[1].legend().remove()
+
+    axes[0].set_xlabel("Number of datapoints") 
+    axes[1].set_xlabel("Number of datapoints") 
+    axes[0].set_ylabel("")
+    axes[1].set_ylabel("")
+    axes[0].set_title(f"Distribution of CIFAR-10 classes\nin the training dataset on 10 example clients", fontsize=16)
+    axes[1].set_title(f"Distribution of CIFAR-10 classes\nin the test dataset on 10 example clients", fontsize=16)
+    axes[0].grid(alpha=0.4, axis="x")
+    axes[1].grid(alpha=0.4, axis="x")
+
+    plt.savefig(f"figures/cifar_class_distribution.png", 
+                dpi=300,
+                bbox_inches="tight",
+                facecolor="white")
+    
+def plot_femnist_distribution():
+    loaders, _ = data.femnist_data(path_to_data_folder="E:/Folders/femnist_data")
+    loaders = loaders[11:21]
+
     classes_counts = pd.DataFrame([pd.Series(np.concatenate([batch[1].numpy() for batch in loader])).value_counts() for loader in loaders]).fillna(0).reset_index(drop=True)
     classes_counts = classes_counts.reindex(sorted(classes_counts.columns), axis=1)
     classes_counts["client"] = [f"Client {value}" for value in reversed(range(1, 11))]
 
     sns.set_theme(style="white", font_scale=1.25)
     fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(8, 6))
-    
-    if dataset_name=="CIFAR-10":
-        classes_counts.plot(x="client", y=list(range(10)), kind="barh", stacked=True, width=0.8, ax=ax, colormap="tab10")
-        ax.legend(title="Class", loc=(1.02, 0.1), handlelength=1.5, handletextpad=0.3)
-    else:
-        sns.set_palette("tab20", plt.cm.tab20.N)
-        classes_counts.plot(x="client", y=list(range(62)), kind="barh", stacked=True, width=0.8, ax=ax)
-        ax.get_legend().remove()
-        
+
+    mpn65 = ['#ff0029', '#377eb8', '#66a61e', '#984ea3', '#00d2d5', '#ff7f00', '#af8d00',
+            '#7f80cd', '#b3e900', '#c42e60', '#a65628', '#f781bf', '#8dd3c7', '#bebada',
+            '#fb8072', '#80b1d3', '#fdb462', '#fccde5', '#bc80bd', '#ffed6f', '#c4eaff',
+            '#cf8c00', '#1b9e77', '#d95f02', '#e7298a', '#e6ab02', '#a6761d', '#0097ff',
+            '#00d067', '#000000', '#252525', '#525252', '#737373', '#969696', '#bdbdbd',
+            '#f43600', '#4ba93b', '#5779bb', '#927acc', '#97ee3f', '#bf3947', '#9f5b00',
+            '#f48758', '#8caed6', '#f2b94f', '#5e5e4a', '#e43872', '#d9b100', '#9d7a00',
+            '#698cff', '#d9d9d9', '#00d27e', '#d06800', '#009f82', '#c49200', '#cbe8ff',
+            '#fecddf', '#c27eb6', '#8cd2ce', '#c4b8d9', '#f883b0', '#a49100']
+    random.seed(7)
+    random.shuffle(mpn65)
+
+    classes_counts.plot(x="client", y=list(range(62)), kind="barh", stacked=True, width=0.8, color=mpn65, ax=ax)
+    ax.get_legend().remove()
+
     ax.set_xlabel("Number of datapoints") 
     ax.set_ylabel("")
-    ax.set_title(f"Distribution of {dataset_name} classes on 10 example clients", fontsize=16)
+    ax.set_title(f"Distribution of FEMNIST classes on 10 example clients", fontsize=16)
     ax.grid(alpha=0.4, axis="x")
-
-    plt.savefig(f"figures/{dataset_name}_class_distribution.png", 
+    
+    plt.savefig(f"figures/femnist_class_distribution.png", 
                 dpi=300,
                 bbox_inches="tight",
                 facecolor="white")
     
 def plot_download_size():
-    downloads = pd.read_csv("results/cifar_downloads.csv")
     
+    downloads = pd.read_csv("results/cifar_downloads.csv")
     sns.set_theme(style='white', font_scale=1.25)
     fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(8, 6))
     sns.barplot(data=downloads, 
@@ -56,12 +105,12 @@ def plot_download_size():
                 hue="Method",
                 palette=["#000000", "#e34a33", "#7a0177", "#c51b8a"],
                 ax=ax)
-    ax.set(yscale="log");
     ax.set_xlabel("")
-    ax.set_ylabel("Download size (bytes - log scale)");
+    ax.set_ylabel("Client Download Size (Bytes)");
     ax.text(x=0.75, y=0.8, s="* Public\ndataset\nsize", alpha=0.6, horizontalalignment="right", fontsize=17, transform=ax.transAxes);
-    ax.set_title("Size of download for each client (CIFAR-10)", fontsize=17);
-    ax.set_xticklabels(["FedAvg\n(Baseline)", "Sparsification", "One-shot\n(MA-Echo)", "Distillation"])
+    ax.set_title("Download Size for each Client on CIFAR-10", fontsize=16);
+    ax.set_xticklabels(["FedAvg", "Sparsification", "One-shot\n(MA-Echo)", "Distillation"]);
+
     plt.savefig("figures/download_size_cifar.png", 
                 dpi=300,
                 bbox_inches="tight",
@@ -72,17 +121,18 @@ def plot_sparsification_pareto():
     all_results = all_results[all_results["keep_first_last"]==False].reset_index(drop=True)
     all_results["max_accuracy"] = all_results["accs"].apply(lambda row: max([value[1] for value in ast.literal_eval(row)]))
 
-    palette = ['#e34a33', '#2b8cbe', '#31a354']
+    palette = ['#2b8cbe', '#e34a33', '#31a354']
     palette_dict = {"Top-k":'#b30000', "Random":'#045a8d', "Threshold":'#006837'}
 
-    for dataset in ["FEMNIST", "CIFAR-10"]:
+    sns.set_theme(style='white', font_scale=1.25)
+    fig, axes = plt.subplots(ncols=2, 
+                            nrows=2, 
+                            figsize=(14, 12),
+                            gridspec_kw={"wspace": 0.15, "hspace":0.2})
 
-        data = all_results[all_results["dataset"]==dataset].reset_index(drop=True)
-        sns.set_theme(style='white', font_scale=1.25)
-        fig, axes = plt.subplots(ncols=2, 
-                                nrows=1, 
-                                figsize=(16, 6))
-        fig.suptitle(f"Maximum Accuracy vs Size (in bytes) on {dataset}", fontsize=16, y=0.935);
+    for i, dataset in enumerate([("FEMNIST", 30000), ("CIFAR-10", 70000)]):
+
+        data = all_results[all_results["dataset"]==dataset[0]].reset_index(drop=True)
 
         pareto=oapackage.ParetoDoubleLong()
         for index in range(0, data.shape[0]):
@@ -90,37 +140,60 @@ def plot_sparsification_pareto():
             pareto.addvalue(solution, index)
         optimal_solutions=data.loc[pareto.allindices(),:]
 
-        for i in range(2):
-            sns.lineplot(data=optimal_solutions,
-                         x="bytes_size", 
-                         y="max_accuracy",
-                         color="black",
-                         lw=2.5,
-                         alpha=0.8,
-                         zorder=-100,
-                         ax=axes[i])
+        sns.lineplot(data=optimal_solutions,
+                     x="bytes_size", 
+                     y="max_accuracy",
+                     color="black",
+                     lw=2.5,
+                     alpha=0.8,
+                     zorder=-100,
+                     ax=axes[i, 0])
 
-            sns.scatterplot(data=data, 
-                         x="bytes_size", 
-                         y="max_accuracy", 
-                         hue="approach", 
-                         hue_order=["Top-k", "Random", "Threshold"],
-                         palette=palette,
-                         s=200,
-                         alpha=0.7,
-                         ax=axes[i])
-            axes[i].grid(alpha=0.4)
-            axes[i].yaxis.set_major_formatter(mtick.PercentFormatter(decimals=0))
-            axes[i].set_ylabel("Accuracy")
-            axes[i].set_xlabel("Size (bytes)")
-            axes[i].legend(facecolor = 'white', framealpha=1.0, loc="lower right");
+        sns.scatterplot(data=data, 
+                     x="bytes_size", 
+                     y="max_accuracy", 
+                     hue="approach", 
+                     hue_order=["Random", "Top-k", "Threshold"],
+                     palette=palette,
+                     s=200,
+                     alpha=1,
+                     ax=axes[i, 0])
 
-        axes[1].set_xlabel("Size (bytes - log scale)")
-        axes[1].set(xscale='log');
+        sns.scatterplot(data=optimal_solutions, 
+             x="bytes_size", 
+             y="max_accuracy", 
+             hue="approach", 
+             hue_order=["Top-k", "Threshold"],
+             palette=palette[1:],
+             s=200,
+             alpha=1,
+             ax=axes[i, 1])
+
+        sns.lineplot(data=optimal_solutions,
+                 x="bytes_size", 
+                 y="max_accuracy",
+                 color="black",
+                 lw=2.5,
+                 alpha=0.8,
+                 zorder=-100,
+                 ax=axes[i, 1])
+
         for _, row in optimal_solutions.iterrows():
             colour = palette_dict[row["approach"]]
-            axes[1].text(x=row["bytes_size"]+2000, 
-                         y=row["max_accuracy"]-2, 
+            if row["spars_label"]=="0.001 (~29.4%)":
+                xshift=-200000
+                yshift=-1.5
+            elif row["spars_label"]=="50%" and dataset[0]=="CIFAR-10":
+                xshift=-100000
+                yshift=-1.5
+            elif row["spars_label"]=="3%" and dataset[0]=="CIFAR-10":
+                xshift=-150000
+                yshift=0
+            else:
+                xshift=dataset[1]
+                yshift=-0.3
+            txt = axes[i, 1].text(x=row["bytes_size"]+xshift, 
+                         y=row["max_accuracy"]+yshift, 
                          s=row["spars_label"], 
                          c=colour, 
                          weight='bold', 
@@ -128,15 +201,33 @@ def plot_sparsification_pareto():
                          size=13, 
                          color='black', 
                          zorder=100)
+            txt.set_path_effects([PathEffects.withStroke(linewidth=3, foreground='w')])
 
-        plt.savefig(f"figures/pareto_front_{dataset}.png", 
-                    dpi=300,
-                    bbox_inches="tight",
-                    facecolor="white")
+        axes[i, 0].set_ylabel("Highest Accuracy Achieved")
+        axes[i, 1].set_ylabel("")
+
+        for x in range(2):
+            axes[i, x].grid(alpha=0.4)
+            axes[i, x].yaxis.set_major_formatter(mtick.PercentFormatter(decimals=0))
+            axes[i, x].legend(title="Sparsification\nApproach", facecolor = 'white', framealpha=1.0, loc="lower right");
+            axes[1, x].set_xlabel("Bytes Uploaded by a Client")
+            axes[0, x].set_xlabel("")
+
+    axes[0, 0].set_title("Bytes Uploaded vs Accuracy\nfor Sparsificiation Methods on FEMNIST")
+    axes[0, 1].set_title("Pareto Optimal Sparsification Methods on FEMNIST")
+    axes[1, 0].set_title("Bytes Uploaded vs Accuracy\nfor Sparsificiation Methods on CIFAR-10")
+    axes[1, 1].set_title("Pareto Optimal Sparsification Methods on CIFAR-10")
+
+    plt.savefig(f"figures/pareto_front_sparsification.png", 
+                dpi=300,
+                bbox_inches="tight",
+                facecolor="white");
     
 def plot_combined_pareto():
+    
     combined_results = pd.read_csv("results/combined_results.csv")
     combined_results["Total Bytes Uploaded"] = combined_results["Total Bytes Uploaded"].astype(np.float64)
+    combined_results["Client Bytes Uploaded"] = combined_results["Client Bytes Uploaded"].astype(np.float64)
 
     class LegendTitle(object):
         def __init__(self, text_props=None):
@@ -150,84 +241,309 @@ def plot_combined_pareto():
             return title
 
     sns.set_theme(style='white', font_scale=1.25)
-
     fig, axes = plt.subplots(ncols=2, 
-                            nrows=1, 
-                            figsize=(16, 6))
+                            nrows=2, 
+                            figsize=(16, 12),
+                            gridspec_kw={"wspace": 0.12, "hspace":0.2})
 
-    for i, dataset in enumerate(["CIFAR-10", "FEMNIST"]):
-
+    for i, dataset in enumerate(["FEMNIST", "CIFAR-10"]):
         data = combined_results[combined_results["Dataset"]==dataset].reset_index(drop=True)
+        for x, variable in enumerate(["Client Bytes Uploaded", "Total Bytes Uploaded"]):
 
-        sns.scatterplot(data=data[data["Type"]=="Baseline"], 
-             x="Total Bytes Uploaded", 
-             y="Accuracy", 
-             hue="Method", 
-             marker="X",
-             color="black",
-             palette=["#000000"],
-             s=200,
-             alpha=1,
-             ax=axes[i])
+            pareto=oapackage.ParetoDoubleLong()
+            for index in range(0, data.shape[0]):
+                solution=oapackage.doubleVector((-data.loc[index, variable], data.loc[index, "Accuracy"]))
+                pareto.addvalue(solution, index)
+            optimal_solutions=data.loc[pareto.allindices(),:]
 
-        sns.scatterplot(data=data[data["Type"]=="Distillation"], 
-             x="Total Bytes Uploaded", 
-             y="Accuracy", 
-             hue="Method", 
-             palette=["#c51b8a", "#fa9fb5"],
-             s=200,
-             alpha=1,
-             ax=axes[i])
+            sns.lineplot(data=optimal_solutions,
+                 x=variable, 
+                 y="Accuracy",
+                 color="black",
+                 lw=2.5,
+                 alpha=0.8,
+                 zorder=-100,
+                 ax=axes[i, x])
 
-        sns.scatterplot(data=data[data["Type"]=="One-shot"], 
-             x="Total Bytes Uploaded", 
-             y="Accuracy", 
-             hue="Method", 
-             palette=["#7a0177", "#bcbddc", "#3182bd"],
-             marker="^",
-             s=200,
-             alpha=1,
-             ax=axes[i])
+            sns.scatterplot(data=data[data["Type"]=="Baseline"], 
+                 x=variable, 
+                 y="Accuracy", 
+                 hue="Method", 
+                 marker="X",
+                 color="black",
+                 palette=["#000000"],
+                 s=200,
+                 alpha=1,
+                 ax=axes[i, x])
 
-        sns.scatterplot(data=data[data["Type"]=="Sparsification"], 
-             x="Total Bytes Uploaded", 
-             y="Accuracy", 
-             hue="Method", 
-             marker="s",
-             palette=["#e34a33", "#fdbb84", "#31a354", "#addd8e"],
-             s=200,
-             alpha=1,
-             zorder=-10,
-             ax=axes[i])
+            sns.scatterplot(data=data[data["Type"]=="Sparsification"], 
+                 x=variable, 
+                 y="Accuracy", 
+                 hue="Method", 
+                 marker="o",
+                 palette=["#e34a33", "#fc8d59", "#fdbb84"],
+                 s=200,
+                 alpha=1,
+                 ax=axes[i, x])
+                #['#b30000', '#e34a33', "#fc8d59", '#fdbb84', '#fdd49e', '#ebdcc3']
+            sns.scatterplot(data=data[data["Type"]=="Distillation"], 
+                 x=variable, 
+                 y="Accuracy", 
+                 hue="Method", 
+                 palette=["#c51b8a", "#fa9fb5"],
+                 marker="s",
+                 s=200,
+                 alpha=1,
+                 ax=axes[i, x])
 
-        axes[i].grid(alpha=0.4)
-        axes[i].yaxis.set_major_formatter(mtick.PercentFormatter(decimals=0))
-        axes[i].set_ylabel("Accuracy")
-        axes[i].set_xlabel("Bytes uploaded by each client")
-        axes[i].legend(facecolor = 'white', framealpha=1.0, loc="lower right");
-        axes[i].set_title(f"Accuracy vs Uploaded Bytes on {dataset}", fontsize=16);
+            sns.scatterplot(data=data[data["Type"]=="One-shot"], 
+                 x=variable, 
+                 y="Accuracy", 
+                 hue="Method", 
+                 palette=["#08519c", "#6baed6", "#bdd7e7"],
+                 marker="^",
+                 s=250,
+                 alpha=1,
+                 ax=axes[i, x])
 
+            axes[i, x].grid(alpha=0.4)
+            axes[i, x].yaxis.set_major_formatter(mtick.PercentFormatter(decimals=0))
+            axes[i, x].set_ylabel("")
 
-        handles, labels = axes[i].get_legend_handles_labels()
-        axes[i].legend([handles[0]] + ["Distillation"] + handles[1:3] + ["One-shot"] + handles[3:6] + ["Sparsification"] + handles[6:10],
-                     [labels[0]] + [""] + ["Distillation (10 (CIFAR) \n or 4 (FEMNIST) rounds)", "Distillation (2 rounds)"] 
-                              + [""] + labels[3:6]  + [""] + labels[6:8] + ["Threshold (~5%)", "Threshold (~0.3%)"],
-                       handler_map={str: LegendTitle({'fontsize': 15})},
-           facecolor="white",
-           framealpha=0.5,
-           borderpad=0.8,
-           loc=(0.425, 0.03))
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    axes[1, 1].legend([handles[0]] + ["Sparsification"] + handles[1:4] + ["Distillation"] + handles[4:6] + ["One-shot"] + handles[6:10],
+                 [labels[0]] + [""] + labels[1:4] + [""] + ["Distillation (10 (CIFAR) \n or 4 (FEMNIST) rounds)", "Distillation (2 rounds)"] + [""] + labels[6:10],
+                   handler_map={str: LegendTitle({'fontsize': 15})},
+                   facecolor="white",
+                   framealpha=1,
+                   borderpad=0.8,
+                   loc=(0.3, 0.03))
 
-    axes[1].set_ylim([0, 86])
-    axes[0].set_ylim([0, 65])
-    axes[0].get_legend().remove()
+    axes[0, 0].legend().remove()
+    axes[0, 1].legend().remove()
+    axes[1, 0].legend().remove()
+    axes[0, 0].set_xlabel("Client Bytes Uploaded (FEMNIST)")
+    axes[0, 1].set_xlabel("Total Bytes Uploaded (FEMNIST)")
+    axes[1, 0].set_xlabel("Client Bytes Uploaded (CIFAR-10)")
+    axes[1, 1].set_xlabel("Total Bytes Uploaded (CIFAR-10)")
+    axes[0, 0].set_ylabel("Accuracy on FEMNIST")
+    axes[1, 0].set_ylabel("Accuracy on CIFAR-10")
+
+    axes[0, 0].set_title("Comparison of Methods on Accuracy vs\nBytes Uploaded by a Client", fontsize=16)
+    axes[0, 1].set_title("Comparison of Methods on Accuracy vs\nTotal Bytes Uploaded by all Clients across all Rounds", fontsize=16)        
 
     plt.savefig(f"figures/pareto_front_combined.png", 
                 dpi=300,
                 bbox_inches="tight",
+                facecolor="white");
+
+def plot_keep_first_last_comparison():
+
+    results = pd.read_csv("results/results.csv")
+    results = results[results["dataset"]=="FEMNIST"]
+    results["accs"] = results["accs"].apply(lambda row: ast.literal_eval(row))
+    results = results.explode("accs").reset_index(drop=True)
+    results["round"] = results["accs"].apply(lambda row: row[0])
+    results["accuracy"] = results["accs"].apply(lambda row: row[1])
+
+    baseline_acc = 80
+    ylim = [0, 85]
+    linewidth = 4
+
+    class LegendTitle(object):
+        def __init__(self, text_props=None):
+            self.text_props = text_props or {}
+            super(LegendTitle, self).__init__()
+
+        def legend_artist(self, legend, orig_handle, fontsize, handlebox):
+            x0, y0 = handlebox.xdescent, handlebox.ydescent
+            title = mtext.Text(x0, y0, orig_handle,  **self.text_props)
+            handlebox.add_artist(title)
+            return title
+
+    sns.set_theme(style='white', font_scale=1.25)
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    topk_results = results[(results["sparsify_by"]==0.3) & (results["approach"]=="Top-k")]
+    sns.lineplot(data=topk_results, 
+                 x="round", 
+                 y="accuracy", 
+                 color="#e34a33",
+                 style="keep_first_last", 
+                 dashes=["", (2, 1)],
+                 linewidth=4,
+                 ax=ax)
+
+    threshold_results = results[(results["sparsify_by"]==0.003) & (results["approach"]=="Threshold")]
+    sns.lineplot(data=threshold_results, 
+                 x="round", 
+                 y="accuracy", 
+                 color="#31a354",
+                 style="keep_first_last",
+                 dashes=["", (2, 1)],
+                 linewidth=4,
+                 ax=ax)
+
+    random_results = results[(results["sparsify_by"]==0.05) & (results["approach"]=="Random")]
+    sns.lineplot(data=random_results, 
+                 x="round", 
+                 y="accuracy", 
+                 color="#2b8cbe",
+                 style="keep_first_last",
+                 dashes=["", (2, 1)],
+                 linewidth=4,
+                 ax=ax)
+
+    ax.grid(alpha=0.4)
+    ax.set_ylim(ylim)
+    ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(["Top-k (30%)"] + handles[0:2] + ["Threshold (0.003)"] + handles[2:4] + ["Random (5%)"] + handles[4:6],
+                 [""] + ["False", "True          "] + [""] + labels[2:4] + [""] + labels[4:6],
+                handler_map={str: LegendTitle({'fontsize': 14})},
+       facecolor="white",
+       framealpha=1,
+       borderpad=0.5,
+       loc=(0.005, 0.435))
+    ax.set_title("Results when forcing (or not) the selection\nof the first and last layers of the model", fontsize=16);
+    plt.gcf().set_dpi(300)
+    plt.savefig(f"figures/keep_first_last_comparison.png", 
+            dpi=300,
+            bbox_inches="tight",
+            facecolor="white")
+    
+def plot_all_accuracy_rounds():
+    
+    results = pd.read_csv("results/results.csv")
+    results["accs"] = results["accs"].apply(lambda row: ast.literal_eval(row))
+    results = results.explode("accs").reset_index(drop=True)
+    results["round"] = results["accs"].apply(lambda row: row[0])
+    results["accuracy"] = results["accs"].apply(lambda row: row[1])
+    results = results[results["keep_first_last"]==False]
+
+    fedavg = pd.read_csv("results/fedavg_results.csv")
+    fedavg["accs"] = fedavg["accs"].apply(lambda row: ast.literal_eval(row))
+    fedavg_femnist = [value[1] for value in fedavg[fedavg["dataset"]=="FEMNIST"]["accs"].values[0]]
+    fedavg_cifar = [value[1] for value in fedavg[fedavg["dataset"]=="CIFAR-10"]["accs"].values[0]]
+
+    sns.set_theme(style='white', font_scale=1.25)
+    fig, axes = plt.subplots(ncols=3, 
+                             nrows=2, 
+                             figsize=(8*3, 6*2),
+                             gridspec_kw={"wspace": 0.11, "hspace":0.18})
+
+    axes[0, 0].plot(fedavg_femnist, 
+                    color="black",
+                    linewidth=4,
+                    label="FedAvg",
+                    zorder=100)
+    sns.lineplot(data=results[(results["approach"]=="Random") & (results["dataset"]=="FEMNIST")].sort_values("spars_label", ascending=False), 
+                 x="round", 
+                 y="accuracy", 
+                 hue="spars_label", 
+                 palette=['#045a8d', '#2b8cbe', '#74a9cf', '#a6bddb', '#d0d1e6', '#d7d8e0'],
+                 hue_order=["50%", "30%", "10%", "5%", "3%", "1%"],
+                 linewidth=4,
+                 ax=axes[0, 0])
+    axes[0, 0].set_title("Random Sparsification on FEMNIST", fontsize=16)
+
+    axes[0, 1].plot(fedavg_femnist, 
+                    color="black",
+                    linewidth=4,
+                    label="FedAvg",
+                    zorder=100)
+    sns.lineplot(data=results[(results["approach"]=="Top-k") & (results["dataset"]=="FEMNIST")].sort_values("spars_label", ascending=False), 
+                 x="round", 
+                 y="accuracy", 
+                 hue="spars_label", 
+                 palette=['#b30000', '#e34a33', '#fc8d59', '#fdbb84', '#fdd49e', '#ebdcc3'],
+                 hue_order=["50%", "30%", "10%", "5%", "3%", "1%"],
+                 linewidth=4,
+                 ax=axes[0, 1])
+    axes[0, 1].set_title("Top-k Sparsification on FEMNIST", fontsize=16)
+
+    axes[0, 2].plot(fedavg_femnist, 
+                    color="black",
+                    linewidth=4,
+                    label="FedAvg",
+                    zorder=100)
+    sns.lineplot(data=results[(results["approach"]=="Threshold") & (results["dataset"]=="FEMNIST")].sort_values("spars_label", ascending=True), 
+                 x="round", 
+                 y="accuracy", 
+                 hue="spars_label", 
+                 palette=['#006837', '#31a354', '#78c679', '#addd8e', '#d9f0a3', '#f5f5bc'],
+                 linewidth=4,
+                 ax=axes[0, 2])
+    axes[0, 2].set_title("Threshold Sparsification on FEMNIST", fontsize=16)
+
+    axes[1, 0].plot(fedavg_cifar, 
+                    color="black",
+                    linewidth=2,
+                    label="FedAvg",
+                    zorder=100)
+    sns.lineplot(data=results[(results["approach"]=="Random") & (results["dataset"]=="CIFAR-10")].sort_values("spars_label", ascending=False), 
+                 x="round", 
+                 y="accuracy", 
+                 hue="spars_label", 
+                 palette=['#045a8d', '#2b8cbe', '#74a9cf', '#a6bddb', '#d0d1e6', '#d7d8e0'],
+                 hue_order=["50%", "30%", "10%", "5%", "3%", "1%"],
+                 linewidth=2,
+                 ax=axes[1, 0])
+    axes[1, 0].set_title("Random Sparsification on CIFAR-10", fontsize=16)
+
+    axes[1, 1].plot(fedavg_cifar, 
+                    color="black",
+                    linewidth=2,
+                    label="FedAvg",
+                    zorder=100)
+    sns.lineplot(data=results[(results["approach"]=="Top-k") & (results["dataset"]=="CIFAR-10")].sort_values("spars_label", ascending=False), 
+                 x="round", 
+                 y="accuracy", 
+                 hue="spars_label", 
+                 palette=['#b30000', '#e34a33', '#fc8d59', '#fdbb84', '#fdd49e', '#ebdcc3'],
+                 hue_order=["50%", "30%", "10%", "5%", "3%", "1%"],
+                 linewidth=2,
+                 ax=axes[1, 1])
+    axes[1, 1].set_title("Top-k Sparsification on CIFAR-10", fontsize=16)
+
+    axes[1, 2].plot(fedavg_cifar, 
+                    color="black",
+                    linewidth=2,
+                    label="FedAvg",
+                    zorder=100)
+    sns.lineplot(data=results[(results["approach"]=="Threshold") & (results["dataset"]=="CIFAR-10")].sort_values("spars_label", ascending=True), 
+                 x="round", 
+                 y="accuracy", 
+                 hue="spars_label", 
+                 palette=['#006837', '#31a354', '#78c679', '#addd8e', '#d9f0a3', '#f5f5bc'],
+                 linewidth=2,
+                 ax=axes[1, 2])
+    axes[1, 2].set_title("Threshold Sparsification on CIFAR-10", fontsize=16)
+
+    for ax in axes.reshape(-1):
+        ax.grid(alpha=1)
+        ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+        ax.legend(facecolor="white", framealpha=0.8, loc="upper left").set_zorder(300)
+
+    axes[1, 1].legend(facecolor="white", framealpha=0.8, loc="lower right").set_zorder(300)
+    axes[1, 2].legend(facecolor="white", framealpha=0.8, loc="lower right").set_zorder(300)
+
+    for i in range(3):
+        axes[0, i].set_ylim(0, 85)
+        axes[0, i].set_xlabel("")
+        axes[1, i].set_ylim(5, 65)
+        axes[1, i].set_xlabel("Federated Learning Round")
+    for i in range(2):
+        axes[i, 1].set_ylabel("")
+        axes[i, 2].set_ylabel("")
+        axes[i, 0].set_ylabel("Accuracy")
+
+    plt.savefig(f"figures/accuracy_round_plots.png", 
+                dpi=300,
+                bbox_inches="tight",
                 facecolor="white")
     
-def plot_results(keep_first_last=False):
+def plot_individual_accuracy_rounds(keep_first_last=False):
     
     results = pd.read_csv("results/results.csv")
     results["accs"] = results["accs"].apply(lambda row: ast.literal_eval(row))
@@ -304,35 +620,101 @@ def plot_results(keep_first_last=False):
                         
 def plot_parameter_difference():
     trainloaders, testloaders = data.femnist_data(path_to_data_folder="E:/Folders/femnist_data")
-
     model = models.create_model("femnist", "CNN500k")
+    
     original_params = np.concatenate([layer.cpu().numpy().ravel() for layer in model.state_dict().values()])
-    utils.train(model, trainloaders[0], lr=0.1, epochs=10)
+    utils.train(model, trainloaders[0], lr=0.1, epochs=1)
     update_params = np.concatenate([layer.cpu().numpy().ravel() for layer in model.state_dict().values()])
     delta_params = np.subtract(update_params, original_params)
 
     sns.set_theme(style='white', font_scale=1.25)
     sns.set_style('ticks')
-    fig, axes = plt.subplots(ncols=2, nrows=1, figsize=(16, 6), sharex=True)
-    for i in range(2):
-        axes[i].hist(delta_params,
-                     bins=31,
+    fig, axes = plt.subplots(ncols=2, nrows=1, figsize=(16, 6))
+
+    axes[0].hist(delta_params,
+                     bins=101,
                      edgecolor="white", 
                      align="mid",
-                     color="#4c68ae")
-        axes[i].set_xlabel("Size of difference")
-
+                     color="#2b8cbe")
+    axes[0].set_xlabel("Size of difference")
     axes[0].set_ylabel("Number of parameters")
+    axes[0].set_xlim([-0.05, 0.05])
+
+    axes[1].hist(np.abs(delta_params),
+                     bins=101,
+                     edgecolor="white", 
+                     align="mid",
+                     color="#2b8cbe")
     axes[1].set_ylabel("Number of parameters (log scale)")
+    axes[1].set_xlabel("Size of absolute difference (log scale)")
     axes[1].set_yscale("log")
+    axes[1].set_xscale("log")
+    axes[1].set_xlim([axes[1].get_xlim()[0], 0.15])
+
     fig.suptitle("The size of the difference to each of the model parameters before and after model training", fontsize=16, y=0.935);
 
     plt.savefig(f"figures/size_difference_parameters.png", 
                 dpi=300,
                 bbox_inches="tight",
                 facecolor="white")
-    
-def plot_threshold_sizes(keep_first_last=False):
+
+def plot_threshold_sizes():
+    threshold_sizes = pd.read_csv("results/threshold_sizes.csv")
+    threshold_sizes["threshold"] = threshold_sizes["threshold"].astype("category")
+    femnist_thresh = threshold_sizes[(threshold_sizes["dataset"]=="FEMNIST") & (threshold_sizes["keep_first_last"]==False)]
+    cifar_thresh = threshold_sizes[(threshold_sizes["dataset"]=="CIFAR-10") & (threshold_sizes["keep_first_last"]==False)]
+    palette=['#31a354', '#78c679', '#addd8e', '#d9f0a3', '#f5f5bc', '#006837', ]
+
+    sns.set_theme(style='white', font_scale=1.25)
+    fig, axes = plt.subplots(ncols=2, 
+                             nrows=1, 
+                             figsize=(16, 6),
+                             gridspec_kw={"wspace": 0.1})
+
+    sns.boxplot(data=femnist_thresh, 
+                 y="Size (bytes)",
+                 hue="threshold", 
+                 x="threshold",
+                 palette=palette,
+                 legend=False,
+                 linewidth=2.25,
+                 flierprops={"marker": "x", "alpha":0.5},
+                 showmeans=True,
+                 meanprops={'marker': 'D', 'markeredgecolor': "black",
+                        'markerfacecolor': "None", 'markersize': 7},
+                 ax=axes[0]);
+
+    sns.boxplot(data=cifar_thresh, 
+                 y="Size (bytes)",
+                 hue="threshold", 
+                 x="threshold",
+                 palette=palette,
+                 legend=False,
+                 linewidth=2.25,
+                 flierprops={"marker": "x", "alpha":0.5},
+                 showmeans=True,
+                 meanprops={'marker': 'D', 'markeredgecolor': "black",
+                        'markerfacecolor': "None", 'markersize': 7},
+                 ax=axes[1]);
+
+    axes[0].grid(alpha=0.4, axis="y")
+    axes[1].grid(alpha=0.4, axis="y")
+    axes[0].set_xlabel("Threshold")
+    axes[1].set_xlabel("Threshold")
+
+    axes[0].set_ylabel("Client Upload Size (bytes)")
+    axes[1].set_ylabel("")
+
+    axes[0].set_title("FEMNIST Dataset", fontsize=16)
+    axes[1].set_title("CIFAR-10 Dataset", fontsize=16)
+    fig.suptitle("Distribution of Client Upload Sizes at each Threshold Level")
+
+    plt.savefig(f"figures/update_sizes_threshold.png", 
+                dpi=300,
+                bbox_inches="tight",
+                facecolor="white")
+
+def plot_individual_threshold_sizes(keep_first_last=False):
 
     threshold_sizes = pd.read_csv("results/threshold_sizes.csv")
     threshold_sizes["threshold"] = threshold_sizes["threshold"].astype("category")
@@ -375,3 +757,69 @@ def plot_threshold_sizes(keep_first_last=False):
                                 dpi=300,
                                 bbox_inches="tight",
                                 facecolor="white")
+
+def plot_threshold_over_time():
+    
+    threshold_sizes = pd.read_csv("results/threshold_sizes.csv")
+    threshold_sizes["threshold"] = threshold_sizes["threshold"].astype("category")
+    femnist_thresh = threshold_sizes[(threshold_sizes["dataset"]=="FEMNIST") & (threshold_sizes["keep_first_last"]==False)]
+    cifar_thresh = threshold_sizes[(threshold_sizes["dataset"]=="CIFAR-10") & (threshold_sizes["keep_first_last"]==False)]
+
+    sns.set_theme(style='white', font_scale=1.25)
+    fig, axes = plt.subplots(ncols=2, 
+                             nrows=2, 
+                             figsize=(16, 6),
+                             gridspec_kw={"wspace": 0.13, "hspace":0.05})
+
+    sns.lineplot(data=femnist_thresh[femnist_thresh["threshold"]==0.005],
+                 x=range(len(femnist_thresh[femnist_thresh["threshold"]==0.005])),
+                 y="Size (bytes)", 
+                 color="#006837",
+                 lw=1,
+                 alpha=1,
+                 zorder=100,
+                 ax=axes[0, 0])
+
+    sns.lineplot(data=cifar_thresh[cifar_thresh["threshold"]==0.005],
+                 x=range(len(cifar_thresh[cifar_thresh["threshold"]==0.005])),
+                 y="Size (bytes)", 
+                 color="#006837",
+                 lw=1,
+                 alpha=1,
+                 zorder=100,
+                 ax=axes[1, 0])
+
+    sns.lineplot(data=femnist_thresh[femnist_thresh["threshold"]==0.007],
+                 x=range(len(femnist_thresh[femnist_thresh["threshold"]==0.007])),
+                 y="Size (bytes)", 
+                 color='#31a354',
+                 lw=1,
+                 alpha=1,
+                 zorder=100,
+                 ax=axes[0, 1])
+
+    sns.lineplot(data=cifar_thresh[cifar_thresh["threshold"]==0.007],
+                 x=range(len(cifar_thresh[cifar_thresh["threshold"]==0.007])),
+                 y="Size (bytes)", 
+                 color='#31a354',
+                 lw=1,
+                 alpha=1,
+                 zorder=100,
+                 ax=axes[1, 1])
+
+    axes[0, 0].set_title("Upload Size for all Clients over all Rounds for\nThreshold 0.005")
+    axes[0, 1].set_title("Upload Size for all Clients over all Rounds for\nThreshold 0.007")
+    axes[0, 0].set_ylabel("Upload size\nfor FEMNIST")
+    axes[1, 0].set_ylabel("Upload size\nfor CIFAR-10")
+    axes[0, 1].set_ylabel("")
+    axes[1, 1].set_ylabel("")
+
+    for ax in axes.reshape(-1): 
+        ax.tick_params(axis="both", pad=-3)
+        ax.grid(alpha=0.5, zorder=-300)
+        ax.set_xticks([])
+
+    plt.savefig(f"figures/threshold_over_time.png", 
+                dpi=300,
+                bbox_inches="tight",
+                facecolor="white")
