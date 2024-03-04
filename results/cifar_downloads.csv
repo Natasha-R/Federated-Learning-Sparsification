@@ -1,0 +1,5 @@
+﻿Method,Download size (bytes),Public dataset size
+FedAvg (Baseline),1885352,0
+Sparsification,1885352,0
+One-Shot (MA-Echo),0,0
+Distillation,800000,24576000
