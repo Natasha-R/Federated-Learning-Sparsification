@@ -1,19 +1,19 @@
-﻿Method,Type,Dataset,Client Bytes Uploaded,Number of Rounds,Proportion Clients,Total Bytes Uploaded,Accuracy
-FedAvg,Baseline,CIFAR-10,1885352,165,0.3,93324924,55
-Distillation (10 rounds),Distillation,CIFAR-10,800000,10,1,8000000,61.9
-Distillation (2 rounds),Distillation,CIFAR-10,800000,2,1,1600000,42
-MA-Echo (2 rounds),One-shot,CIFAR-10,7233548,2,1,14467096,27.38
-MA-Echo (1 round),One-shot,CIFAR-10,7233548,1,1,7233548,16.2
-FedKT (1 student),One-shot,CIFAR-10,1885352,1,1,1885352,33.94
-Top-k (10%),Sparsification,CIFAR-10,377064,132,0.3,14931734.4,60.1
-Top-k (1%),Sparsification,CIFAR-10,37704,125,0.3,1413900,50
-Top-k (0.4%),Sparsification,CIFAR-10,15082,125,0.3,565575,44.6
-FedAvg,Baseline,FEMNIST,1477752,26,0.24,9221172.48,80.2
-Distillation (4 rounds),Distillation,FEMNIST,5191384,4,1,20765536,80.1
-Distillation (2 rounds),Distillation,FEMNIST,5191384,2,1,10382768,73.9
-MA-Echo (2 rounds),One-shot,FEMNIST,6106556,2,1,12213112,73.78
-MA-Echo (1 round),One-shot,FEMNIST,6106556,1,1,6106556,43.7
-FedKT (1 student),One-shot,FEMNIST,1477752,1,1,1477752,14.23
-Top-k (10%),Sparsification,FEMNIST,295544,26,0.24,1844194.56,80.4
-Top-k (1%),Sparsification,FEMNIST,29552,28,0.24,198589.44,73.5
-Top-k (0.4%),Sparsification,FEMNIST,11822,29,0.24,82281.12,64
+﻿Method,Type,Dataset,Client Bytes Uploaded,Number of Rounds,Number of Clients,Proportion Clients,Total Bytes Uploaded,Accuracy
+FedAvg,Baseline,CIFAR-10,1885352,165,50,0.3,4666246200,55
+Distillation (10 rounds),Distillation,CIFAR-10,800000,10,20,1,160000000,61.9
+Distillation (2 rounds),Distillation,CIFAR-10,800000,2,20,1,32000000,42
+MA-Echo (2 rounds),One-shot,CIFAR-10,7233548,2,50,1,723354800,27.38
+MA-Echo (1 round),One-shot,CIFAR-10,7233548,1,50,1,361677400,16.2
+FedKT (1 student),One-shot,CIFAR-10,1885352,1,50,1,94267600,33.94
+Top-k (10%),Sparsification,CIFAR-10,377064,132,50,0.3,746586720,60.1
+Top-k (1%),Sparsification,CIFAR-10,37704,125,50,0.3,70695000,50
+Top-k (0.4%),Sparsification,CIFAR-10,15082,125,50,0.3,28278750,44.6
+FedAvg,Baseline,FEMNIST,1477752,26,50,0.24,461058624,80.2
+Distillation (4 rounds),Distillation,FEMNIST,5191384,4,20,1,415310720,80.1
+Distillation (2 rounds),Distillation,FEMNIST,5191384,2,20,1,207655360,73.9
+MA-Echo (2 rounds),One-shot,FEMNIST,6106556,2,50,1,610655600,73.78
+MA-Echo (1 round),One-shot,FEMNIST,6106556,1,50,1,305327800,43.7
+FedKT (1 student),One-shot,FEMNIST,1477752,1,50,1,73887600,14.23
+Top-k (10%),Sparsification,FEMNIST,295544,26,50,0.24,92209728,80.4
+Top-k (1%),Sparsification,FEMNIST,29552,28,50,0.24,9929472,73.5
+Top-k (0.4%),Sparsification,FEMNIST,11822,29,50,0.24,4114056,64
