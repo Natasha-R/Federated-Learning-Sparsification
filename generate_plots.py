@@ -7,6 +7,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.text as mtext
 import matplotlib.ticker as mtick
+import matplotlib.patheffects as PathEffects
 import ast
 import oapackage
 import random
@@ -36,12 +37,12 @@ def plot_cifar_distribution():
     axes[0].legend(title="Class", loc=(2.05, 0.04), handlelength=1.5, handleheight=2, handletextpad=0.3)
     axes[1].legend().remove()
 
-    axes[0].set_xlabel("Number of datapoints") 
-    axes[1].set_xlabel("Number of datapoints") 
+    axes[0].set_xlabel("Number of Datapoints") 
+    axes[1].set_xlabel("Number of Datapoints") 
     axes[0].set_ylabel("")
     axes[1].set_ylabel("")
-    axes[0].set_title(f"Distribution of CIFAR-10 classes\nin the training dataset on 10 example clients", fontsize=16)
-    axes[1].set_title(f"Distribution of CIFAR-10 classes\nin the test dataset on 10 example clients", fontsize=16)
+    axes[0].set_title(f"Distribution of CIFAR-10 Classes\nin the Training Dataset on 10 Example Clients", fontsize=16)
+    axes[1].set_title(f"Distribution of CIFAR-10 Classes\nin the Test Dataset on 10 Example Clients", fontsize=16)
     axes[0].grid(alpha=0.4, axis="x")
     axes[1].grid(alpha=0.4, axis="x")
 
@@ -76,9 +77,9 @@ def plot_femnist_distribution():
     classes_counts.plot(x="client", y=list(range(62)), kind="barh", stacked=True, width=0.8, color=mpn65, ax=ax)
     ax.get_legend().remove()
 
-    ax.set_xlabel("Number of datapoints") 
+    ax.set_xlabel("Number of Datapoints") 
     ax.set_ylabel("")
-    ax.set_title(f"Distribution of FEMNIST classes on 10 example clients", fontsize=16)
+    ax.set_title(f"Distribution of FEMNIST Classes on 10 Example Clients", fontsize=16)
     ax.grid(alpha=0.4, axis="x")
     
     plt.savefig(f"figures/femnist_class_distribution.png", 
@@ -118,7 +119,9 @@ def plot_download_size():
     
 def plot_sparsification_pareto():
     all_results = pd.read_csv("results/results.csv")
+    extra_topk = pd.read_csv("results/threshold_vs_topk.csv").iloc[:,:-1]
     all_results = all_results[all_results["keep_first_last"]==False].reset_index(drop=True)
+    all_results = pd.concat([all_results, extra_topk]).drop_duplicates().reset_index(drop=True)
     all_results["max_accuracy"] = all_results["accs"].apply(lambda row: max([value[1] for value in ast.literal_eval(row)]))
 
     palette = ['#2b8cbe', '#e34a33', '#31a354']
@@ -213,10 +216,10 @@ def plot_sparsification_pareto():
             axes[1, x].set_xlabel("Bytes Uploaded by a Client")
             axes[0, x].set_xlabel("")
 
-    axes[0, 0].set_title("Bytes Uploaded vs Accuracy\nfor Sparsificiation Methods on FEMNIST")
-    axes[0, 1].set_title("Pareto Optimal Sparsification Methods on FEMNIST")
-    axes[1, 0].set_title("Bytes Uploaded vs Accuracy\nfor Sparsificiation Methods on CIFAR-10")
-    axes[1, 1].set_title("Pareto Optimal Sparsification Methods on CIFAR-10")
+    axes[0, 0].set_title("Bytes Uploaded vs Accuracy\nfor Sparsification Approaches on FEMNIST")
+    axes[0, 1].set_title("Pareto Optimal Sparsification Approaches on FEMNIST")
+    axes[1, 0].set_title("Bytes Uploaded vs Accuracy\nfor Sparsification Approaches on CIFAR-10")
+    axes[1, 1].set_title("Pareto Optimal Sparsification Approaches on CIFAR-10")
 
     plt.savefig(f"figures/pareto_front_sparsification.png", 
                 dpi=300,
@@ -228,18 +231,7 @@ def plot_combined_pareto():
     combined_results = pd.read_csv("results/combined_results.csv")
     combined_results["Total Bytes Uploaded"] = combined_results["Total Bytes Uploaded"].astype(np.float64)
     combined_results["Client Bytes Uploaded"] = combined_results["Client Bytes Uploaded"].astype(np.float64)
-
-    class LegendTitle(object):
-        def __init__(self, text_props=None):
-            self.text_props = text_props or {}
-            super(LegendTitle, self).__init__()
-
-        def legend_artist(self, legend, orig_handle, fontsize, handlebox):
-            x0, y0 = handlebox.xdescent, handlebox.ydescent
-            title = mtext.Text(x0, y0, orig_handle,  **self.text_props)
-            handlebox.add_artist(title)
-            return title
-
+    
     sns.set_theme(style='white', font_scale=1.25)
     fig, axes = plt.subplots(ncols=2, 
                             nrows=2, 
@@ -350,17 +342,6 @@ def plot_keep_first_last_comparison():
     ylim = [0, 85]
     linewidth = 4
 
-    class LegendTitle(object):
-        def __init__(self, text_props=None):
-            self.text_props = text_props or {}
-            super(LegendTitle, self).__init__()
-
-        def legend_artist(self, legend, orig_handle, fontsize, handlebox):
-            x0, y0 = handlebox.xdescent, handlebox.ydescent
-            title = mtext.Text(x0, y0, orig_handle,  **self.text_props)
-            handlebox.add_artist(title)
-            return title
-
     sns.set_theme(style='white', font_scale=1.25)
     fig, ax = plt.subplots(figsize=(8, 6))
 
@@ -406,7 +387,8 @@ def plot_keep_first_last_comparison():
        borderpad=0.5,
        loc=(0.005, 0.435))
     ax.set_title("Results when forcing (or not) the selection\nof the first and last layers of the model", fontsize=16);
-    plt.gcf().set_dpi(300)
+    ax.set_xlabel("Federated Learning Round")
+    ax.set_ylabel("Accuracy")
     plt.savefig(f"figures/keep_first_last_comparison.png", 
             dpi=300,
             bbox_inches="tight",
@@ -432,11 +414,13 @@ def plot_all_accuracy_rounds():
                              figsize=(8*3, 6*2),
                              gridspec_kw={"wspace": 0.11, "hspace":0.18})
 
-    axes[0, 0].plot(fedavg_femnist, 
-                    color="black",
-                    linewidth=4,
-                    label="FedAvg",
-                    zorder=100)
+    sns.lineplot(x=range(1, len(fedavg_femnist)+1),
+                 y=fedavg_femnist,
+                 color="black",
+                 linewidth=4,
+                 label="FedAvg",
+                 zorder=100,
+                 ax=axes[0, 0])
     sns.lineplot(data=results[(results["approach"]=="Random") & (results["dataset"]=="FEMNIST")].sort_values("spars_label", ascending=False), 
                  x="round", 
                  y="accuracy", 
@@ -447,11 +431,13 @@ def plot_all_accuracy_rounds():
                  ax=axes[0, 0])
     axes[0, 0].set_title("Random Sparsification on FEMNIST", fontsize=16)
 
-    axes[0, 1].plot(fedavg_femnist, 
-                    color="black",
-                    linewidth=4,
-                    label="FedAvg",
-                    zorder=100)
+    sns.lineplot(x=range(1, len(fedavg_femnist)+1),
+                 y=fedavg_femnist,
+                 color="black",
+                 linewidth=4,
+                 label="FedAvg",
+                 zorder=100,
+                 ax=axes[0, 1])
     sns.lineplot(data=results[(results["approach"]=="Top-k") & (results["dataset"]=="FEMNIST")].sort_values("spars_label", ascending=False), 
                  x="round", 
                  y="accuracy", 
@@ -462,11 +448,13 @@ def plot_all_accuracy_rounds():
                  ax=axes[0, 1])
     axes[0, 1].set_title("Top-k Sparsification on FEMNIST", fontsize=16)
 
-    axes[0, 2].plot(fedavg_femnist, 
-                    color="black",
-                    linewidth=4,
-                    label="FedAvg",
-                    zorder=100)
+    sns.lineplot(x=range(1, len(fedavg_femnist)+1),
+                 y=fedavg_femnist,
+                 color="black",
+                 linewidth=4,
+                 label="FedAvg",
+                 zorder=100,
+                 ax=axes[0, 2])
     sns.lineplot(data=results[(results["approach"]=="Threshold") & (results["dataset"]=="FEMNIST")].sort_values("spars_label", ascending=True), 
                  x="round", 
                  y="accuracy", 
@@ -476,11 +464,13 @@ def plot_all_accuracy_rounds():
                  ax=axes[0, 2])
     axes[0, 2].set_title("Threshold Sparsification on FEMNIST", fontsize=16)
 
-    axes[1, 0].plot(fedavg_cifar, 
-                    color="black",
-                    linewidth=2,
-                    label="FedAvg",
-                    zorder=100)
+    sns.lineplot(x=range(1, len(fedavg_cifar)+1),
+                 y=fedavg_cifar,
+                 color="black",
+                 linewidth=2,
+                 label="FedAvg",
+                 zorder=100,
+                 ax=axes[1, 0])
     sns.lineplot(data=results[(results["approach"]=="Random") & (results["dataset"]=="CIFAR-10")].sort_values("spars_label", ascending=False), 
                  x="round", 
                  y="accuracy", 
@@ -491,11 +481,13 @@ def plot_all_accuracy_rounds():
                  ax=axes[1, 0])
     axes[1, 0].set_title("Random Sparsification on CIFAR-10", fontsize=16)
 
-    axes[1, 1].plot(fedavg_cifar, 
-                    color="black",
-                    linewidth=2,
-                    label="FedAvg",
-                    zorder=100)
+    sns.lineplot(x=range(1, len(fedavg_cifar)+1),
+                 y=fedavg_cifar,
+                 color="black",
+                 linewidth=2,
+                 label="FedAvg",
+                 zorder=100,
+                 ax=axes[1, 1])
     sns.lineplot(data=results[(results["approach"]=="Top-k") & (results["dataset"]=="CIFAR-10")].sort_values("spars_label", ascending=False), 
                  x="round", 
                  y="accuracy", 
@@ -506,11 +498,13 @@ def plot_all_accuracy_rounds():
                  ax=axes[1, 1])
     axes[1, 1].set_title("Top-k Sparsification on CIFAR-10", fontsize=16)
 
-    axes[1, 2].plot(fedavg_cifar, 
-                    color="black",
-                    linewidth=2,
-                    label="FedAvg",
-                    zorder=100)
+    sns.lineplot(x=range(1, len(fedavg_cifar)+1),
+                 y=fedavg_cifar,
+                 color="black",
+                 linewidth=2,
+                 label="FedAvg",
+                 zorder=100,
+                 ax=axes[1, 2])
     sns.lineplot(data=results[(results["approach"]=="Threshold") & (results["dataset"]=="CIFAR-10")].sort_values("spars_label", ascending=True), 
                  x="round", 
                  y="accuracy", 
@@ -636,8 +630,8 @@ def plot_parameter_difference():
                      edgecolor="white", 
                      align="mid",
                      color="#2b8cbe")
-    axes[0].set_xlabel("Size of difference")
-    axes[0].set_ylabel("Number of parameters")
+    axes[0].set_xlabel("Size of Difference")
+    axes[0].set_ylabel("Number of Parameters")
     axes[0].set_xlim([-0.05, 0.05])
 
     axes[1].hist(np.abs(delta_params),
@@ -645,13 +639,13 @@ def plot_parameter_difference():
                      edgecolor="white", 
                      align="mid",
                      color="#2b8cbe")
-    axes[1].set_ylabel("Number of parameters (log scale)")
-    axes[1].set_xlabel("Size of absolute difference (log scale)")
+    axes[1].set_ylabel("Number of Parameters (Log Scale)")
+    axes[1].set_xlabel("Size of Absolute Difference (Log Scale)")
     axes[1].set_yscale("log")
     axes[1].set_xscale("log")
     axes[1].set_xlim([axes[1].get_xlim()[0], 0.15])
 
-    fig.suptitle("The size of the difference to each of the model parameters before and after model training", fontsize=16, y=0.935);
+    fig.suptitle("The Size of the Difference to each of the Model Parameters Before and After Model Training", fontsize=16, y=0.935);
 
     plt.savefig(f"figures/size_difference_parameters.png", 
                 dpi=300,
@@ -823,3 +817,14 @@ def plot_threshold_over_time():
                 dpi=300,
                 bbox_inches="tight",
                 facecolor="white")
+    
+class LegendTitle(object):
+    def __init__(self, text_props=None):
+        self.text_props = text_props or {}
+        super(LegendTitle, self).__init__()
+
+    def legend_artist(self, legend, orig_handle, fontsize, handlebox):
+        x0, y0 = handlebox.xdescent, handlebox.ydescent
+        title = mtext.Text(x0, y0, orig_handle,  **self.text_props)
+        handlebox.add_artist(title)
+        return title
