@@ -110,7 +110,7 @@ def plot_download_size():
     ax.set_ylabel("Client Download Size (Bytes)");
     ax.text(x=0.75, y=0.8, s="* Public\ndataset\nsize", alpha=0.6, horizontalalignment="right", fontsize=17, transform=ax.transAxes);
     ax.set_title("Download Size for each Client on CIFAR-10", fontsize=16);
-    ax.set_xticklabels(["FedAvg", "Sparsification", "One-shot\n(MA-Echo)", "Distillation"]);
+    ax.set_xticklabels(["FedAvg", "Sparsification", "One-shot\n(MA-Echo)", "Federated\nDistillation"]);
 
     plt.savefig("figures/download_size_cifar.png", 
                 dpi=300,
@@ -314,7 +314,7 @@ def plot_combined_pareto():
             axes[i, x].set_ylabel("")
 
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    axes[1, 1].legend([handles[0]] + ["Sparsification"] + handles[1:4] + ["Distillation"] + handles[4:6] + ["One-shot"] + handles[6:10],
+    axes[1, 1].legend([handles[0]] + ["Sparsification"] + handles[1:4] + ["Federated distillation"] + handles[4:6] + ["One-shot"] + handles[6:10],
                  [labels[0]] + [""] + labels[1:4] + [""] + ["Distillation (10 (CIFAR) \n or 4 (FEMNIST) rounds)", "Distillation (2 rounds)"] + [""] + labels[6:10],
                    handler_map={str: LegendTitle({'fontsize': 15})},
                    facecolor="white",
