@@ -828,7 +828,57 @@ def plot_threshold_over_time():
                 dpi=300,
                 bbox_inches="tight",
                 facecolor="white")
+
     
+def plot_threshold_vs_topk():
+    
+    results = pd.read_csv("results/threshold_vs_topk.csv")
+    results["accs"] = results["accs"].apply(lambda row: ast.literal_eval(row))
+    results = results.explode("accs").reset_index(drop=True)
+    results["round"] = results["accs"].apply(lambda row: row[0])
+    results["accuracy"] = results["accs"].apply(lambda row: row[1])
+    sns.set_theme(style="white", font_scale=1.25)
+    fig, axes = plt.subplots(ncols=5, nrows=2, 
+                             figsize=(24, 8), 
+                             gridspec_kw={"wspace": 0.2,
+                                          "hspace": 0.3})
+    titles=["30% Top-k vs ~29.4% Threshold",
+            "5% Top-k vs ~5.6% Threshold",
+            "1% Top-k vs ~0.8% Threshold",
+            "0.5% Top-k vs ~0.5% Threshold",
+            "0.4% Top-k vs ~0.4% Threshold",
+            "25% Top-k vs ~24.5% Threshold",
+            "3% Top-k vs ~3.6% Threshold",
+            "1% Top-k vs ~1.2% Threshold",
+            "0.4% Top-k vs ~0.4% Threshold",
+            "0.2% Top-k vs ~0.2% Threshold"]
+    for plot, ax in enumerate(axes.reshape(-1), start=1):
+        sns.lineplot(data=results[results["plot"]==plot],
+                     x="round",
+                     y="accuracy",
+                     hue="approach",
+                     palette=["#e34a33", "#31a354"],
+                     linewidth=1.5,
+                     ax=ax)
+        ax.yaxis.set_major_formatter(mtick.PercentFormatter(decimals=0))
+        ax.grid(alpha=0.4, zorder=-300)
+        ax.set_ylabel("")
+        ax.set_xlabel("")
+        ax.get_legend().remove()
+        ax.set_title(titles[plot-1])
+    axes[0, 0].legend(title="Approach", framealpha=1)
+
+    axes[0, 0].set_ylabel("Accuracy on FEMNIST")
+    axes[1, 0].set_ylabel("Accuracy on CIFAR-10")
+
+    for i in range(5):
+        axes[1, i].set_xlabel("Federated Learning Round")
+
+    plt.savefig(f"figures/topk_vs_threshold.png", 
+                dpi=300,
+                bbox_inches="tight",
+                facecolor="white")
+
 class LegendTitle(object):
     def __init__(self, text_props=None):
         self.text_props = text_props or {}
