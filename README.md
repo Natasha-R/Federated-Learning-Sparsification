@@ -57,6 +57,8 @@ Federated Averaging [(https://arxiv.org/abs/1602.05629)](https://arxiv.org/abs/1
 Example command:  
 ``python simulation.py --dataset_name="cifar" --approach="topk" --sparsify_by=0.1 --num_rounds=180``
 
+Requires version flwr==1.6.0. Version flwr==1.8.0 has bugs, as per https://github.com/Natasha-R/Federated-Learning-Sparsification/issues/1 .
+
 | Parameter          | Description                                                                                                                                |
 |--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
 | --dataset_name     | Can be ``femnist`` or ``cifar``.                                                                                                            |
